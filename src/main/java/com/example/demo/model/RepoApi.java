@@ -1,0 +1,16 @@
+package com.example.demo.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record RepoApi(
+        @JsonProperty("full_name")
+        String fullName,
+        String description,
+        @JsonProperty("clone_url")
+        String cloneUrl,
+        @JsonProperty("stargazers_count")
+        Integer stars,
+        @JsonProperty("created_at")
+        String createdAt
+) {
+}
