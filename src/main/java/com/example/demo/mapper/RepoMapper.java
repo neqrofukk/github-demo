@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 public interface RepoMapper {
 
     RepoDto toRepoDto(RepoApi repo);
+    RepoDto toRepoDto(Repo repo);
 
     @Mapping(target = "id", ignore = true)
     Repo toEntity(RepoDto repo);

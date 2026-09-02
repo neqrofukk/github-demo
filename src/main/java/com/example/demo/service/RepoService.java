@@ -2,10 +2,12 @@ package com.example.demo.service;
 
 import com.example.demo.client.GitHubRepoClient;
 import com.example.demo.entity.Repo;
+import com.example.demo.exception.RepoNotFoundException;
 import com.example.demo.mapper.RepoMapper;
 import com.example.demo.model.RepoApi;
 import com.example.demo.model.RepoCreateCommand;
 import com.example.demo.model.RepoDto;
+import com.example.demo.model.RepoUpdateCommand;
 import com.example.demo.repository.RepoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,10 +23,31 @@ public class RepoService {
         RepoApi repo = client.getRepo(owner, repositoryName);
         return mapper.toRepoDto(repo);
     }
+
+    public RepoDto getRepository(String owner, String repositoryName) {
+        String fullName = Repo.buildFullName(owner, repositoryName);
+        Repo repoEntity = repository.findByFullName(fullName).orElseThrow(() -> new RepoNotFoundException("Repo " + fullName + " not found"));
+        return mapper.toRepoDto(repoEntity);
+    }
     
     public RepoDto createRepository(String owner, String repositoryName, RepoCreateCommand repo) {
-        Repo repoEntity = (new Repo()).addRepo(owner, repositoryName, repo);
-        return mapper.to
+        Repo repoEntity = Repo.addRepo(owner, repositoryName, repo);
+        Repo savedRepo = repository.save(repoEntity);
+        return mapper.toRepoDto(savedRepo);
+    }
+
+    public RepoDto updateRepository(String owner, String repositoryName, RepoUpdateCommand repo) {
+        String fullName = Repo.buildFullName(owner, repositoryName);
+        Repo repoEntity = repository.findByFullName(fullName).orElseThrow(() -> new RepoNotFoundException("Repo " + fullName + " not found"));
+        repoEntity.updateRepo(owner, repositoryName, repo);
+        Repo savedRepo = repository.save(repoEntity);
+        return mapper.toRepoDto(savedRepo);
+    }
+
+    public void deleteRepository(String owner, String repositoryName) {
+        String fullName = Repo.buildFullName(owner, repositoryName);
+        Repo repoEntity = repository.findByFullName(fullName).orElseThrow(() -> new RepoNotFoundException("Repo " + fullName + " not found"));
+        repository.delete(repoEntity);
     }
 
 }
