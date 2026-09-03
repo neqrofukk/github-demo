@@ -30,6 +30,7 @@ public class RepoController {
     @GetMapping("/repositories/{owner}/{repositoryName}")
     @ResponseStatus(HttpStatus.OK)
     RepoDto getGitHubRepository(@PathVariable String owner, @PathVariable String repositoryName) {
+        log.info("GET /repositories/{}/{}", owner, repositoryName);
         return service.getApiRepository(owner, repositoryName);
     }
 
@@ -41,6 +42,7 @@ public class RepoController {
     @GetMapping("/local/repositories/{owner}/{repositoryName}")
     @ResponseStatus(HttpStatus.OK)
     RepoDto getRepository(@PathVariable String owner, @PathVariable String repositoryName) {
+        log.info("GET /local/repositories/{}/{}", owner, repositoryName);
         return service.getRepository(owner, repositoryName);
     }
 
@@ -52,6 +54,7 @@ public class RepoController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/repositories/{owner}/{repositoryName}")
     RepoDto createRepository(@PathVariable String owner, @PathVariable String repositoryName, @RequestBody RepoCreateCommand body) {
+        log.info("POST /repositories/{}/{}", owner, repositoryName);
         return service.createRepository(owner, repositoryName, body);
     }
 
@@ -63,6 +66,7 @@ public class RepoController {
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/repositories/{owner}/{repositoryName}")
     RepoDto updateRepository(@PathVariable String owner, @PathVariable String repositoryName, @RequestBody RepoUpdateCommand body) {
+        log.info("PUT /repositories/{}/{}", owner, repositoryName);
         return service.updateRepository(owner, repositoryName, body);
     }
     @Operation(summary = "Delete repository")
@@ -73,6 +77,7 @@ public class RepoController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/repositories/{owner}/{repositoryName}")
     void deleteRepository(@PathVariable String owner, @PathVariable String repositoryName) {
+        log.info("DELETE /repositories/{}/{}", owner, repositoryName);
         service.deleteRepository(owner, repositoryName);
     }
 

@@ -1,26 +1,22 @@
-package com.example.demo.service;
+package com.example.demo.controller;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RepoServiceTest {
-
-    @Test
-    void getRepository() {
-    }
+class RepoControllerTest {
 
     @BeforeEach
     void setUp() {
     }
 
     @Test
-    void getApiRepository() {
+    void getGitHubRepository() {
     }
 
     @Test
-    void testGetRepository() {
+    void getRepository() {
     }
 
     @Test
