@@ -1,8 +1,8 @@
 package com.example.demo.mapper;
 
 import com.example.demo.entity.Repo;
-import com.example.demo.model.RepoApi;
-import com.example.demo.model.RepoDto;
+import com.example.demo.dto.RepoApi;
+import com.example.demo.dto.RepoDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

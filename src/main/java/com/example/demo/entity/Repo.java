@@ -1,7 +1,7 @@
 package com.example.demo.entity;
 
-import com.example.demo.model.RepoCreateCommand;
-import com.example.demo.model.RepoUpdateCommand;
+import com.example.demo.dto.RepoCreateCommand;
+import com.example.demo.dto.RepoUpdateCommand;
 import jakarta.persistence.*;
 import lombok.*;
 
