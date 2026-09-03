@@ -19,11 +19,16 @@ public class Repo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+    @Column(unique = true, nullable = false)
     String fullName;
     String description;
+    @Column(nullable = false)
     String cloneUrl;
+    @Column(nullable = false)
     Integer stars;
+    @Column(nullable = false)
     LocalDateTime createdAt;
+    @Column(nullable = false)
     String owner;
 
     @Version
