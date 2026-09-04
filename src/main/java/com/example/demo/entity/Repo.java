@@ -1,6 +1,5 @@
 package com.example.demo.entity;
 
-import com.example.demo.dto.RepoCreateCommand;
 import com.example.demo.dto.RepoUpdateCommand;
 import jakarta.persistence.*;
 import lombok.*;
@@ -36,17 +35,6 @@ public class Repo {
 
     public static String buildFullName(String owner, String repositoryName) {
         return owner + "/" + repositoryName;
-    }
-
-    public static Repo addRepo(String owner, String repositoryName, RepoCreateCommand command) {
-        Repo repo = new Repo();
-        repo.setFullName(buildFullName(owner, repositoryName));
-        repo.setDescription(command.description());
-        repo.setCloneUrl(command.cloneUrl());
-        repo.setStars(command.stars());
-        repo.setCreatedAt(LocalDateTime.now());
-        repo.setOwner(owner);
-        return repo;
     }
 
     public void updateRepo(String owner, String repositoryName, RepoUpdateCommand command) {
