@@ -4,5 +4,4 @@ public record RepoCreateCommand(
         String description,
         String cloneUrl,
         Integer stars
-) {
-}
+) { }

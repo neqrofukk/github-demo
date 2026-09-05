@@ -6,5 +6,4 @@ public record RepoUpdateCommand(
         String description,
         String cloneUrl,
         Integer stars
-) {
-}
+) { }

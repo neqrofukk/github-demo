@@ -11,4 +11,5 @@ public abstract class RepoException extends RuntimeException {
         super(message);
         this.status = status;
     }
+
 }

@@ -31,7 +31,7 @@ public class RepoController {
     @ResponseStatus(HttpStatus.OK)
     RepoDto getGitHubRepository(@PathVariable String owner, @PathVariable String repositoryName) {
         log.info("GET /repositories/{}/{}", owner, repositoryName);
-        return service.getApiRepository(owner, repositoryName);
+        return service.getGitHubRepository(owner, repositoryName);
     }
 
     @Operation(summary = "Get local repository by owner and repository name")
@@ -69,6 +69,7 @@ public class RepoController {
         log.info("PUT /repositories/{}/{}", owner, repositoryName);
         return service.updateRepository(owner, repositoryName, body);
     }
+
     @Operation(summary = "Delete repository")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Repository deleted"),

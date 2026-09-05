@@ -1,9 +1,9 @@
 package com.example.demo.service;
 
-import com.example.demo.client.GitHubRepoClient;
-import com.example.demo.dto.RepoApi;
+import com.example.demo.client.github.GitHubRepoClient;
 import com.example.demo.dto.RepoCreateCommand;
 import com.example.demo.dto.RepoDto;
+import com.example.demo.dto.RepoGitHub;
 import com.example.demo.dto.RepoUpdateCommand;
 import com.example.demo.entity.Repo;
 import com.example.demo.exception.RepoAlreadyExistsException;
@@ -38,9 +38,9 @@ class RepoServiceTest {
     }
 
     @Test
-    void getApiRepository_RepositoryExists_RepositoryReturned() {
+    void getGitHubRepository_RepositoryExists_RepositoryReturned() {
         // given
-        RepoApi repo = new RepoApi(
+        RepoGitHub repo = new RepoGitHub(
                 "neqrofukk/medical-clinic",
                 "Highly advanced future tech medical app",
                 "https://github.com/neqrofukk/medical-clinic.git",
@@ -50,7 +50,7 @@ class RepoServiceTest {
         when(gitHubRepoClient.getRepo("neqrofukk", "medical-clinic")).thenReturn(repo);
 
         // when
-        RepoDto result = repoService.getApiRepository("neqrofukk", "medical-clinic");
+        RepoDto result = repoService.getGitHubRepository("neqrofukk", "medical-clinic");
 
         // then
         Assertions.assertAll(

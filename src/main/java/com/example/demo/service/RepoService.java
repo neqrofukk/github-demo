@@ -1,14 +1,14 @@
 package com.example.demo.service;
 
-import com.example.demo.client.GitHubRepoClient;
+import com.example.demo.client.github.GitHubRepoClient;
+import com.example.demo.dto.RepoCreateCommand;
+import com.example.demo.dto.RepoDto;
+import com.example.demo.dto.RepoGitHub;
+import com.example.demo.dto.RepoUpdateCommand;
 import com.example.demo.entity.Repo;
 import com.example.demo.exception.RepoAlreadyExistsException;
 import com.example.demo.exception.RepoNotFoundException;
 import com.example.demo.mapper.RepoMapper;
-import com.example.demo.dto.RepoApi;
-import com.example.demo.dto.RepoCreateCommand;
-import com.example.demo.dto.RepoDto;
-import com.example.demo.dto.RepoUpdateCommand;
 import com.example.demo.repository.RepoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,13 +17,13 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class RepoService {
-    private final GitHubRepoClient client;
+    private final GitHubRepoClient gitHubClient;
     private final RepoMapper mapper;
     private final RepoRepository repository;
 
     @Transactional
-    public RepoDto getApiRepository(String owner, String repositoryName) {
-        RepoApi repo = client.getRepo(owner, repositoryName);
+    public RepoDto getGitHubRepository(String owner, String repositoryName) {
+        RepoGitHub repo = gitHubClient.getRepo(owner, repositoryName);
         return mapper.toRepoDto(repo);
     }
 

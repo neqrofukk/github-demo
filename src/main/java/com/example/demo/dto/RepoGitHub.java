@@ -2,7 +2,7 @@ package com.example.demo.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record RepoApi(
+public record RepoGitHub(
         @JsonProperty("full_name")
         String fullName,
         String description,
@@ -12,5 +12,4 @@ public record RepoApi(
         Integer stars,
         @JsonProperty("created_at")
         String createdAt
-) {
-}
+) { }
