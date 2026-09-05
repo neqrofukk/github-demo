@@ -1,10 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.client.github.GitHubRepoClient;
-import com.example.demo.dto.RepoCreateCommand;
-import com.example.demo.dto.RepoDto;
-import com.example.demo.dto.RepoGitHub;
-import com.example.demo.dto.RepoUpdateCommand;
+import com.example.demo.client.github.GitHubRepositoryClient;
+import com.example.demo.dto.*;
 import com.example.demo.entity.Repo;
 import com.example.demo.exception.RepoAlreadyExistsException;
 import com.example.demo.exception.RepoNotFoundException;
@@ -19,35 +16,30 @@ import org.mockito.Mockito;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
+import static com.example.demo.util.RepoTestDataFactory.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class RepoServiceTest {
     RepoService repoService;
-    GitHubRepoClient gitHubRepoClient;
+    GitHubRepositoryClient gitHubRepositoryClient;
     RepoRepository repoRepository;
     RepoMapper repoMapper;
 
     @BeforeEach
     void setup() {
-        this.gitHubRepoClient = Mockito.mock(GitHubRepoClient.class);
+        this.gitHubRepositoryClient = Mockito.mock(GitHubRepositoryClient.class);
         this.repoRepository = Mockito.mock(RepoRepository.class);
         this.repoMapper = Mappers.getMapper(RepoMapper.class);
-        this.repoService = new RepoService(gitHubRepoClient, repoMapper, repoRepository);
+        this.repoService = new RepoService(gitHubRepositoryClient, repoMapper, repoRepository);
     }
 
     @Test
     void getGitHubRepository_RepositoryExists_RepositoryReturned() {
         // given
-        RepoGitHub repo = new RepoGitHub(
-                "neqrofukk/medical-clinic",
-                "Highly advanced future tech medical app",
-                "https://github.com/neqrofukk/medical-clinic.git",
-                2137,
-                "2000-11-23T08:12:30Z"
-        );
-        when(gitHubRepoClient.getRepo("neqrofukk", "medical-clinic")).thenReturn(repo);
+        GitHubRepositoryResponse repo = gitHubRepositoryResponse();
+        when(gitHubRepositoryClient.getRepository("neqrofukk", "medical-clinic")).thenReturn(repo);
 
         // when
         RepoDto result = repoService.getGitHubRepository("neqrofukk", "medical-clinic");
@@ -58,24 +50,15 @@ class RepoServiceTest {
                 () -> assertEquals("Highly advanced future tech medical app", result.description()),
                 () -> assertEquals("https://github.com/neqrofukk/medical-clinic.git", result.cloneUrl()),
                 () -> assertEquals(2137, result.stars()),
-                () -> assertEquals(OffsetDateTime.parse("2000-11-23T08:12:30Z").toLocalDateTime(), result.createdAt())
+                () -> assertEquals(OffsetDateTime.parse("2000-11-23T08:12:30Z"), result.createdAt())
         );
-        verify(gitHubRepoClient).getRepo("neqrofukk", "medical-clinic");
+        verify(gitHubRepositoryClient).getRepository("neqrofukk", "medical-clinic");
     }
 
     @Test
     void getRepository_RepositoryExists_RepositoryReturned() {
         // given
-        Repo repo = new Repo(
-                1L,
-                "neqrofukk/medical-clinic",
-                "Highly advanced future tech medical app",
-                "https://github.com/neqrofukk/medical-clinic.git",
-                2137,
-                OffsetDateTime.parse("2000-11-23T08:12:30Z").toLocalDateTime(),
-                "neqrofukk",
-                1L
-        );
+        Repo repo = repoEntity();
         when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.of(repo));
 
         // when
@@ -87,7 +70,7 @@ class RepoServiceTest {
                 () -> assertEquals("Highly advanced future tech medical app", result.description()),
                 () -> assertEquals("https://github.com/neqrofukk/medical-clinic.git", result.cloneUrl()),
                 () -> assertEquals(2137, result.stars()),
-                () -> assertEquals(OffsetDateTime.parse("2000-11-23T08:12:30Z").toLocalDateTime(), result.createdAt())
+                () -> assertEquals(OffsetDateTime.parse("2000-11-23T08:12:30Z"), result.createdAt())
         );
         verify(repoRepository).findByFullName("neqrofukk/medical-clinic");
     }
@@ -107,11 +90,7 @@ class RepoServiceTest {
     @Test
     void createRepository_ValidCreationData_RepositoryCreatedAndReturned() {
         // given
-        RepoCreateCommand repoCreateCommand = new RepoCreateCommand(
-                "Highly advanced future tech medical app",
-                "https://github.com/neqrofukk/medical-clinic.git",
-                2137
-        );
+        RepoCreateCommand repoCreateCommand = repoCreateCommand();
         Repo repoEntity = repoMapper.toRepoEntity("neqrofukk", "medical-clinic", repoCreateCommand);
         when(repoRepository.save(any(Repo.class))).thenReturn(repoEntity);
 
@@ -131,11 +110,7 @@ class RepoServiceTest {
     @Test
     void createRepository_RepositoryAlreadyExists_ThrowsException() {
         // given
-        RepoCreateCommand repoCreateCommand = new RepoCreateCommand(
-                "Highly advanced future tech medical app",
-                "https://github.com/neqrofukk/medical-clinic.git",
-                2137
-        );
+        RepoCreateCommand repoCreateCommand = repoCreateCommand();
         when(repoRepository.existsByFullName("neqrofukk/medical-clinic")).thenReturn(true);
 
         // when + then
@@ -149,33 +124,9 @@ class RepoServiceTest {
     @Test
     void updateRepository_RepositoryExists_RepositoryUpdatedAndReturned() {
         // given
-        RepoUpdateCommand repoUpdateCommand = new RepoUpdateCommand(
-                "neqrofukk2",
-                "medical-clinic2",
-                "Highly advanced future tech medical app updated",
-                "https://github.com/neqrofukk/medical-clinic2.git",
-                6767
-        );
-        Repo repo = new Repo(
-                1L,
-                "neqrofukk/medical-clinic",
-                "Highly advanced future tech medical app",
-                "https://github.com/neqrofukk/medical-clinic.git",
-                2137,
-                OffsetDateTime.parse("2000-11-23T08:12:30Z").toLocalDateTime(),
-                "neqrofukk",
-                1L
-        );
-        Repo updatedRepo = new Repo(
-                1L,
-                "neqrofukk2/medical-clinic2",
-                "Highly advanced future tech medical app updated",
-                "https://github.com/neqrofukk/medical-clinic2.git",
-                6767,
-                OffsetDateTime.parse("2000-11-24T09:14:30Z").toLocalDateTime(),
-                "neqrofukk2",
-                1L
-        );
+        RepoUpdateCommand repoUpdateCommand = repoUpdateCommand();
+        Repo repo = repoEntity();
+        Repo updatedRepo = updatedRepoEntity();
 
         when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.of(repo));
         when(repoRepository.save(repo)).thenReturn(updatedRepo);
@@ -187,7 +138,7 @@ class RepoServiceTest {
         Assertions.assertAll(
                 () -> assertEquals("neqrofukk2/medical-clinic2", result.fullName()),
                 () -> assertEquals("Highly advanced future tech medical app updated", result.description()),
-                () -> assertEquals("https://github.com/neqrofukk/medical-clinic2.git", result.cloneUrl()),
+                () -> assertEquals("https://github.com/neqrofukk2/medical-clinic2.git", result.cloneUrl()),
                 () -> assertEquals(6767, result.stars())
         );
         verify(repoRepository).save(repo);
@@ -196,13 +147,7 @@ class RepoServiceTest {
     @Test
     void updateRepository_RepositoryNotFound_ThrowsException() {
         // given
-        RepoUpdateCommand repoUpdateCommand = new RepoUpdateCommand(
-                "neqrofukk2",
-                "medical-clinic2",
-                "Highly advanced future tech medical app updated",
-                "https://github.com/neqrofukk/medical-clinic2.git",
-                6767
-        );
+        RepoUpdateCommand repoUpdateCommand = repoUpdateCommand();
         when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.empty());
 
         // when + then
@@ -214,19 +159,10 @@ class RepoServiceTest {
     }
 
     @Test
-    void deleteRepository_RepositoryExists_RepositoryDeleted() {
+    void deleteRepository_RepositoryNotFound_RepositoryDeleted() {
         // when
         String fullName = "neqrofukk/medical-clinic";
-        Repo repo = new Repo(
-                1L,
-                "neqrofukk2/medical-clinic2",
-                "Highly advanced future tech medical app updated",
-                "https://github.com/neqrofukk/medical-clinic.git",
-                6767,
-                OffsetDateTime.parse("2000-11-24T09:14:30Z").toLocalDateTime(),
-                "neqrofukk2",
-                1L
-        );
+        Repo repo = repoEntity();
         when(repoRepository.findByFullName(fullName)).thenReturn(Optional.of(repo));
 
         // when
@@ -238,7 +174,7 @@ class RepoServiceTest {
     }
 
     @Test
-    void deleteRepository_RepositoryExists_ThrowsException() {
+    void deleteRepository_RepositoryNotFound_ThrowsException() {
         // given
         when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.empty());
 

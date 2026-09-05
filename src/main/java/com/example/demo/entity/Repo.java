@@ -4,11 +4,10 @@ import com.example.demo.dto.RepoUpdateCommand;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -16,19 +15,19 @@ import java.time.LocalDateTime;
 public class Repo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(unique = true, nullable = false)
-    String fullName;
-    String description;
+    private String fullName;
+    private String description;
     @Column(nullable = false)
-    String cloneUrl;
+    private String cloneUrl;
     @Column(nullable = false)
-    Integer stars;
+    private Integer stars;
     @Column(nullable = false)
-    LocalDateTime createdAt;
+    private OffsetDateTime createdAt;
     @Column(nullable = false)
-    String owner;
+    private String owner;
 
     @Version
     private Long version;
@@ -37,23 +36,28 @@ public class Repo {
         return owner + "/" + repositoryName;
     }
 
-    public void updateRepo(String owner, String repositoryName, RepoUpdateCommand command) {
+    public void update(String owner, String repositoryName, RepoUpdateCommand command) {
         if (command.owner() != null) {
             this.fullName = buildFullName(command.owner(), command.repositoryName() != null ? command.repositoryName() : repositoryName);
             this.owner = command.owner();
         }
+
         if (command.repositoryName() != null) {
             this.fullName = buildFullName(command.owner() != null ? command.owner() : owner, command.repositoryName());
         }
+
         if (command.description() != null) {
             this.description = command.description();
         }
+
         if (command.cloneUrl() != null) {
             this.cloneUrl = command.cloneUrl();
         }
+
         if (command.stars() != null) {
             this.stars = command.stars();
         }
+
     }
 
     @Override

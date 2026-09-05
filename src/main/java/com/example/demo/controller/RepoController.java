@@ -27,9 +27,9 @@ public class RepoController {
             @ApiResponse(responseCode = "403", description = "Access forbidden"),
             @ApiResponse(responseCode = "404", description = "Repository not found")
     })
-    @GetMapping("/repositories/{owner}/{repositoryName}")
+    @GetMapping("/github/repositories/{owner}/{repositoryName}")
     @ResponseStatus(HttpStatus.OK)
-    RepoDto getGitHubRepository(@PathVariable String owner, @PathVariable String repositoryName) {
+    public RepoDto getGitHubRepository(@PathVariable String owner, @PathVariable String repositoryName) {
         log.info("GET /repositories/{}/{}", owner, repositoryName);
         return service.getGitHubRepository(owner, repositoryName);
     }
@@ -41,7 +41,7 @@ public class RepoController {
     })
     @GetMapping("/local/repositories/{owner}/{repositoryName}")
     @ResponseStatus(HttpStatus.OK)
-    RepoDto getRepository(@PathVariable String owner, @PathVariable String repositoryName) {
+    public RepoDto getRepository(@PathVariable String owner, @PathVariable String repositoryName) {
         log.info("GET /local/repositories/{}/{}", owner, repositoryName);
         return service.getRepository(owner, repositoryName);
     }
@@ -49,11 +49,12 @@ public class RepoController {
     @Operation(summary = "Create repository")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Repository created"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
             @ApiResponse(responseCode = "409", description = "Repository already exists")
     })
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/repositories/{owner}/{repositoryName}")
-    RepoDto createRepository(@PathVariable String owner, @PathVariable String repositoryName, @RequestBody RepoCreateCommand body) {
+    @PostMapping("/local/repositories/{owner}/{repositoryName}")
+    public RepoDto createRepository(@PathVariable String owner, @PathVariable String repositoryName, @RequestBody RepoCreateCommand body) {
         log.info("POST /repositories/{}/{}", owner, repositoryName);
         return service.createRepository(owner, repositoryName, body);
     }
@@ -61,11 +62,12 @@ public class RepoController {
     @Operation(summary = "Update repository")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Repository updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
             @ApiResponse(responseCode = "404", description = "Repository not found")
     })
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/repositories/{owner}/{repositoryName}")
-    RepoDto updateRepository(@PathVariable String owner, @PathVariable String repositoryName, @RequestBody RepoUpdateCommand body) {
+    @PutMapping("/local/repositories/{owner}/{repositoryName}")
+    public RepoDto updateRepository(@PathVariable String owner, @PathVariable String repositoryName, @RequestBody RepoUpdateCommand body) {
         log.info("PUT /repositories/{}/{}", owner, repositoryName);
         return service.updateRepository(owner, repositoryName, body);
     }
@@ -76,8 +78,8 @@ public class RepoController {
             @ApiResponse(responseCode = "404", description = "Repository not found")
     })
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/repositories/{owner}/{repositoryName}")
-    void deleteRepository(@PathVariable String owner, @PathVariable String repositoryName) {
+    @DeleteMapping("/local/repositories/{owner}/{repositoryName}")
+    public void deleteRepository(@PathVariable String owner, @PathVariable String repositoryName) {
         log.info("DELETE /repositories/{}/{}", owner, repositoryName);
         service.deleteRepository(owner, repositoryName);
     }

@@ -11,6 +11,6 @@ public interface RepoRepository extends JpaRepository<Repo, Long> {
 
     Optional<Repo> findByFullName(String fullName);
 
-    Boolean existsByFullName(String fullName);
+    boolean existsByFullName(String fullName);
 
 }

@@ -2,7 +2,7 @@ package com.example.demo.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record RepoGitHub(
+public record GitHubRepositoryResponse(
         @JsonProperty("full_name")
         String fullName,
         String description,

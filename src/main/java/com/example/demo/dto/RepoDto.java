@@ -1,11 +1,11 @@
 package com.example.demo.dto;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 public record RepoDto(
         String fullName,
         String description,
         String cloneUrl,
         Integer stars,
-        LocalDateTime createdAt
+        OffsetDateTime createdAt
 ) { }

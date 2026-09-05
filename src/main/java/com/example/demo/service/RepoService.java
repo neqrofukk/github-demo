@@ -1,10 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.client.github.GitHubRepoClient;
-import com.example.demo.dto.RepoCreateCommand;
-import com.example.demo.dto.RepoDto;
-import com.example.demo.dto.RepoGitHub;
-import com.example.demo.dto.RepoUpdateCommand;
+import com.example.demo.client.github.GitHubRepositoryClient;
+import com.example.demo.dto.*;
 import com.example.demo.entity.Repo;
 import com.example.demo.exception.RepoAlreadyExistsException;
 import com.example.demo.exception.RepoNotFoundException;
@@ -17,17 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Service
 public class RepoService {
-    private final GitHubRepoClient gitHubClient;
+    private final GitHubRepositoryClient gitHubClient;
     private final RepoMapper mapper;
     private final RepoRepository repository;
 
-    @Transactional
     public RepoDto getGitHubRepository(String owner, String repositoryName) {
-        RepoGitHub repo = gitHubClient.getRepo(owner, repositoryName);
+        GitHubRepositoryResponse repo = gitHubClient.getRepository(owner, repositoryName);
         return mapper.toRepoDto(repo);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public RepoDto getRepository(String owner, String repositoryName) {
         String fullName = Repo.buildFullName(owner, repositoryName);
         Repo repoEntity = repository.findByFullName(fullName).orElseThrow(() -> new RepoNotFoundException(fullName));
@@ -37,10 +33,10 @@ public class RepoService {
     @Transactional
     public RepoDto createRepository(String owner, String repositoryName, RepoCreateCommand repo) {
         String fullName = Repo.buildFullName(owner, repositoryName);
-        Repo repoEntity = mapper.toRepoEntity(owner, repositoryName, repo);
         if (repository.existsByFullName(fullName)) {
             throw new RepoAlreadyExistsException(fullName);
         }
+        Repo repoEntity = mapper.toRepoEntity(owner, repositoryName, repo);
         Repo savedRepo = repository.save(repoEntity);
         return mapper.toRepoDto(savedRepo);
     }
@@ -49,7 +45,7 @@ public class RepoService {
     public RepoDto updateRepository(String owner, String repositoryName, RepoUpdateCommand repo) {
         String fullName = Repo.buildFullName(owner, repositoryName);
         Repo repoEntity = repository.findByFullName(fullName).orElseThrow(() -> new RepoNotFoundException(fullName));
-        repoEntity.updateRepo(owner, repositoryName, repo);
+        repoEntity.update(owner, repositoryName, repo);
         Repo savedRepo = repository.save(repoEntity);
         return mapper.toRepoDto(savedRepo);
     }
