@@ -105,7 +105,7 @@ class RepoServiceTest {
     }
 
     @Test
-    void createRepository_ValidCreateData_RepositoryCreatedAndReturned() {
+    void createRepository_ValidCreationData_RepositoryCreatedAndReturned() {
         // given
         RepoCreateCommand repoCreateCommand = new RepoCreateCommand(
                 "Highly advanced future tech medical app",
@@ -131,13 +131,19 @@ class RepoServiceTest {
     @Test
     void createRepository_RepositoryAlreadyExists_ThrowsException() {
         // given
+        RepoCreateCommand repoCreateCommand = new RepoCreateCommand(
+                "Highly advanced future tech medical app",
+                "https://github.com/neqrofukk/medical-clinic.git",
+                2137
+        );
         when(repoRepository.existsByFullName("neqrofukk/medical-clinic")).thenReturn(true);
 
         // when + then
         RepoAlreadyExistsException exception = assertThrows(
                 RepoAlreadyExistsException.class,
-                () -> repoService.createRepository("neqrofukk", "medical-clinic")
-        )
+                () -> repoService.createRepository("neqrofukk", "medical-clinic", repoCreateCommand));
+        assertEquals("Repo neqrofukk/medical-clinic already exists", exception.getMessage());
+        verify(repoRepository).existsByFullName("neqrofukk/medical-clinic");
     }
 
     @Test
@@ -188,6 +194,26 @@ class RepoServiceTest {
     }
 
     @Test
+    void updateRepository_RepositoryNotFound_ThrowsException() {
+        // given
+        RepoUpdateCommand repoUpdateCommand = new RepoUpdateCommand(
+                "neqrofukk2",
+                "medical-clinic2",
+                "Highly advanced future tech medical app updated",
+                "https://github.com/neqrofukk/medical-clinic2.git",
+                6767
+        );
+        when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.empty());
+
+        // when + then
+        RepoNotFoundException exception = assertThrows(
+                RepoNotFoundException.class,
+                () -> repoService.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand));
+        assertEquals("Repo neqrofukk/medical-clinic not found", exception.getMessage());
+        verify(repoRepository).findByFullName("neqrofukk/medical-clinic");
+    }
+
+    @Test
     void deleteRepository_RepositoryExists_RepositoryDeleted() {
         // when
         String fullName = "neqrofukk/medical-clinic";
@@ -211,4 +237,15 @@ class RepoServiceTest {
         verify(repoRepository, times(1)).delete(repo);
     }
 
+    @Test
+    void deleteRepository_RepositoryExists_ThrowsException() {
+        // given
+        when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.empty());
+
+        // when + then
+        RepoNotFoundException exception = assertThrows(
+                RepoNotFoundException.class,
+                () -> repoService.deleteRepository("neqrofukk", "medical-clinic"));
+        assertEquals("Repo neqrofukk/medical-clinic not found", exception.getMessage());
+    }
 }
