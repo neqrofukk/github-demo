@@ -1,6 +1,6 @@
 package com.example.demo.mapper;
 
-import com.example.demo.dto.GitHubRepositoryResponse;
+import com.example.demo.client.github.GitHubRepositoryResponse;
 import com.example.demo.dto.RepoCreateCommand;
 import com.example.demo.dto.RepoDto;
 import com.example.demo.entity.Repo;
@@ -16,6 +16,9 @@ public interface RepoMapper {
 
     RepoDto toRepoDto(Repo repo);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "version", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "fullName", expression = "java(Repo.buildFullName(owner, repositoryName))")
     Repo toRepoEntity(String owner, String repositoryName, RepoCreateCommand repo);
 

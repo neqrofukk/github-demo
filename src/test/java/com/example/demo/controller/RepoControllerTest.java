@@ -9,7 +9,6 @@ import com.example.demo.exception.RepoNotFoundException;
 import com.example.demo.service.RepoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,8 +22,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest
-@AutoConfigureMockMvc
+@WebMvcTest(RepoController.class)
 class RepoControllerTest {
 
     @Autowired
@@ -188,9 +186,9 @@ class RepoControllerTest {
                         .content(objectMapper.writeValueAsString(repoUpdateCommand)))
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.fullName").value("neqrofukk2"),
+                        jsonPath("$.fullName").value("neqrofukk2/medical-clinic2"),
                         jsonPath("$.description").value("Highly advanced future tech medical app updated"),
-                        jsonPath("$.cloneUrl").value("https://github.com/neqrofukk/medical-clinic2.git"),
+                        jsonPath("$.cloneUrl").value("https://github.com/neqrofukk2/medical-clinic2.git"),
                         jsonPath("$.stars").value(6767),
                         jsonPath("$.createdAt").value("2000-11-24T09:14:30Z")
                 );

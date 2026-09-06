@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.client.github.GitHubRepositoryClient;
+import com.example.demo.client.github.GitHubRepositoryResponse;
 import com.example.demo.dto.*;
 import com.example.demo.entity.Repo;
 import com.example.demo.exception.RepoAlreadyExistsException;
@@ -45,9 +46,8 @@ public class RepoService {
     public RepoDto updateRepository(String owner, String repositoryName, RepoUpdateCommand repo) {
         String fullName = Repo.buildFullName(owner, repositoryName);
         Repo repoEntity = repository.findByFullName(fullName).orElseThrow(() -> new RepoNotFoundException(fullName));
-        repoEntity.update(owner, repositoryName, repo);
-        Repo savedRepo = repository.save(repoEntity);
-        return mapper.toRepoDto(savedRepo);
+        repoEntity.update(repo);
+        return mapper.toRepoDto(repoEntity);
     }
 
     @Transactional
@@ -56,5 +56,7 @@ public class RepoService {
         Repo repoEntity = repository.findByFullName(fullName).orElseThrow(() -> new RepoNotFoundException(fullName));
         repository.delete(repoEntity);
     }
+
+
 
 }

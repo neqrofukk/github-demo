@@ -3,6 +3,7 @@ package com.example.demo.entity;
 import com.example.demo.dto.RepoUpdateCommand;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.OffsetDateTime;
 
@@ -13,21 +14,31 @@ import java.time.OffsetDateTime;
 @Builder
 @Table(name = "repositories")
 public class Repo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "full_name", unique = true, nullable = false)
     private String fullName;
-    private String description;
-    @Column(nullable = false)
-    private String cloneUrl;
-    @Column(nullable = false)
-    private Integer stars;
-    @Column(nullable = false)
-    private OffsetDateTime createdAt;
+
     @Column(nullable = false)
     private String owner;
+
+    @Column(name = "repository_name", nullable = false)
+    private String repositoryName;
+
+    private String description;
+
+    @Column(name = "clone_url", nullable = false)
+    private String cloneUrl;
+
+    @Column(nullable = false)
+    private Integer stars;
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private OffsetDateTime createdAt;
 
     @Version
     private Long version;
@@ -36,41 +47,35 @@ public class Repo {
         return owner + "/" + repositoryName;
     }
 
-    public void update(String owner, String repositoryName, RepoUpdateCommand command) {
+    public void update(RepoUpdateCommand command) {
         if (command.owner() != null) {
-            this.fullName = buildFullName(command.owner(), command.repositoryName() != null ? command.repositoryName() : repositoryName);
             this.owner = command.owner();
         }
-
         if (command.repositoryName() != null) {
-            this.fullName = buildFullName(command.owner() != null ? command.owner() : owner, command.repositoryName());
+            this.repositoryName = command.repositoryName();
         }
+        this.fullName = buildFullName(this.owner, this.repositoryName);
 
         if (command.description() != null) {
             this.description = command.description();
         }
-
         if (command.cloneUrl() != null) {
             this.cloneUrl = command.cloneUrl();
         }
-
         if (command.stars() != null) {
             this.stars = command.stars();
         }
-
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Repo))
-            return false;
-        Repo other = (Repo) o;
-        return id != null && id.equals(other.getId());
+        if (!(o instanceof Repo other)) return false;
+        return id != null && id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
-        return getClass().hashCode();
+        return Repo.class.hashCode();
     }
 }

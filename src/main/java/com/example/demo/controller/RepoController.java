@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,7 @@ public class RepoController {
     })
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/local/repositories/{owner}/{repositoryName}")
-    public RepoDto createRepository(@PathVariable String owner, @PathVariable String repositoryName, @RequestBody RepoCreateCommand body) {
+    public RepoDto createRepository(@PathVariable String owner, @PathVariable String repositoryName, @Valid @RequestBody RepoCreateCommand body) {
         log.info("POST /repositories/{}/{}", owner, repositoryName);
         return service.createRepository(owner, repositoryName, body);
     }
@@ -67,8 +68,8 @@ public class RepoController {
     })
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/local/repositories/{owner}/{repositoryName}")
-    public RepoDto updateRepository(@PathVariable String owner, @PathVariable String repositoryName, @RequestBody RepoUpdateCommand body) {
-        log.info("PUT /repositories/{}/{}", owner, repositoryName);
+    public RepoDto updateRepository(@PathVariable String owner, @PathVariable String repositoryName, @Valid @RequestBody RepoUpdateCommand body) {
+        log.info("PUT /local/repositories/{}/{}", owner, repositoryName);
         return service.updateRepository(owner, repositoryName, body);
     }
 
@@ -80,7 +81,7 @@ public class RepoController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/local/repositories/{owner}/{repositoryName}")
     public void deleteRepository(@PathVariable String owner, @PathVariable String repositoryName) {
-        log.info("DELETE /repositories/{}/{}", owner, repositoryName);
+        log.info("DELETE /local/repositories/{}/{}", owner, repositoryName);
         service.deleteRepository(owner, repositoryName);
     }
 

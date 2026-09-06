@@ -1,7 +1,9 @@
-package com.example.demo.dto;
+package com.example.demo.client.github;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Builder;
 
+@Builder
 public record GitHubRepositoryResponse(
         @JsonProperty("full_name")
         String fullName,

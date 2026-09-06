@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.client.github.GitHubRepositoryClient;
+import com.example.demo.client.github.GitHubRepositoryResponse;
 import com.example.demo.dto.*;
 import com.example.demo.entity.Repo;
 import com.example.demo.exception.RepoAlreadyExistsException;
@@ -126,10 +127,8 @@ class RepoServiceTest {
         // given
         RepoUpdateCommand repoUpdateCommand = repoUpdateCommand();
         Repo repo = repoEntity();
-        Repo updatedRepo = updatedRepoEntity();
 
         when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.of(repo));
-        when(repoRepository.save(repo)).thenReturn(updatedRepo);
 
         // when
         RepoDto result = repoService.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand);
@@ -141,7 +140,7 @@ class RepoServiceTest {
                 () -> assertEquals("https://github.com/neqrofukk2/medical-clinic2.git", result.cloneUrl()),
                 () -> assertEquals(6767, result.stars())
         );
-        verify(repoRepository).save(repo);
+        verify(repoRepository).findByFullName("neqrofukk/medical-clinic");
     }
 
     @Test
@@ -159,7 +158,7 @@ class RepoServiceTest {
     }
 
     @Test
-    void deleteRepository_RepositoryNotFound_RepositoryDeleted() {
+    void deleteRepository_RepositoryExists_RepositoryDeleted() {
         // when
         String fullName = "neqrofukk/medical-clinic";
         Repo repo = repoEntity();
