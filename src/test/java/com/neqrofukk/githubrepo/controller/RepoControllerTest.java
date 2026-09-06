@@ -1,8 +1,5 @@
 package com.neqrofukk.githubrepo.controller;
 
-import com.neqrofukk.githubrepo.dto.RepoCreateCommand;
-import com.neqrofukk.githubrepo.dto.RepoDto;
-import com.neqrofukk.githubrepo.dto.RepoUpdateCommand;
 import com.neqrofukk.githubrepo.exception.GitHubRepositoryException;
 import com.neqrofukk.githubrepo.exception.RepoAlreadyExistsException;
 import com.neqrofukk.githubrepo.exception.RepoNotFoundException;
@@ -35,18 +32,17 @@ class RepoControllerTest {
     @Test
     void getGitHubRepository_RepositoryExists_Response200() throws Exception {
         // given
-        RepoDto repo = repoDto();
-        when(service.getGitHubRepository("neqrofukk", "medical-clinic")).thenReturn(repo);
+        when(service.getGitHubRepository("neqrofukk", "medical-clinic")).thenReturn(gitHubRepositoryDto());
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.get("/github/repositories/neqrofukk/medical-clinic"))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.fullName").value("neqrofukk/medical-clinic"),
-                        jsonPath("$.description").value("Highly advanced future tech medical app"),
+                        jsonPath("$.description").isEmpty(),
                         jsonPath("$.cloneUrl").value("https://github.com/neqrofukk/medical-clinic.git"),
-                        jsonPath("$.stars").value(2137),
-                        jsonPath("$.createdAt").value("2000-11-23T08:12:30Z")
+                        jsonPath("$.stars").value(0),
+                        jsonPath("$.createdAt").value("2026-07-25T15:31:52Z")
                 );
         verify(service).getGitHubRepository("neqrofukk", "medical-clinic");
     }
@@ -102,8 +98,7 @@ class RepoControllerTest {
     @Test
     void getRepository_RepositoryExists_Response200() throws Exception {
         // given
-        RepoDto repo = repoDto();
-        when(service.getRepository("neqrofukk", "medical-clinic")).thenReturn(repo);
+        when(service.getRepository("neqrofukk", "medical-clinic")).thenReturn(repoDto());
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.get("/local/repositories/neqrofukk/medical-clinic"))
@@ -136,14 +131,12 @@ class RepoControllerTest {
     @Test
     void createRepository_ValidCreationData_Response201() throws Exception {
         // given
-        RepoCreateCommand repoCreateCommand = repoCreateCommand();
-        RepoDto repo = repoDto();
-        when(service.createRepository("neqrofukk", "medical-clinic", repoCreateCommand)).thenReturn(repo);
+        when(service.createRepository("neqrofukk", "medical-clinic", repoCreateCommand())).thenReturn(repoDto());
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.post("/local/repositories/neqrofukk/medical-clinic")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(repoCreateCommand)))
+                        .content(objectMapper.writeValueAsString(repoCreateCommand())))
                 .andExpectAll(
                         status().isCreated(),
                         jsonPath("$.fullName").value("neqrofukk/medical-clinic"),
@@ -152,38 +145,35 @@ class RepoControllerTest {
                         jsonPath("$.stars").value(2137),
                         jsonPath("$.createdAt").value("2000-11-23T08:12:30Z")
                 );
-        verify(service).createRepository("neqrofukk", "medical-clinic", repoCreateCommand);
+        verify(service).createRepository("neqrofukk", "medical-clinic", repoCreateCommand());
     }
 
     @Test
     void createRepository_RepositoryAlreadyExists_Response409() throws Exception {
         // given
-        RepoCreateCommand repoCreateCommand = repoCreateCommand();
-        when(service.createRepository("neqrofukk", "medical-clinic", repoCreateCommand)).thenThrow(new RepoAlreadyExistsException("neqrofukk/medical-clinic"));
+        when(service.createRepository("neqrofukk", "medical-clinic", repoCreateCommand())).thenThrow(new RepoAlreadyExistsException("neqrofukk/medical-clinic"));
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.post("/local/repositories/neqrofukk/medical-clinic")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(repoCreateCommand)))
+                        .content(objectMapper.writeValueAsString(repoCreateCommand())))
                 .andExpectAll(
                         status().isConflict(),
                         jsonPath("$.status").value(409),
                         jsonPath("$.detail").value("Repo neqrofukk/medical-clinic already exists")
                 );
-        verify(service).createRepository("neqrofukk", "medical-clinic", repoCreateCommand);
+        verify(service).createRepository("neqrofukk", "medical-clinic", repoCreateCommand());
     }
 
     @Test
     void updateRepository_RepositoryExists_Response200() throws Exception {
         // given
-        RepoUpdateCommand repoUpdateCommand = repoUpdateCommand();
-        RepoDto updatedRepo = updatedRepoDto();
-        when(service.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand)).thenReturn(updatedRepo);
+        when(service.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand())).thenReturn(updatedRepoDto());
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.put("/local/repositories/neqrofukk/medical-clinic")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(repoUpdateCommand)))
+                        .content(objectMapper.writeValueAsString(repoUpdateCommand())))
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.fullName").value("neqrofukk2/medical-clinic2"),
@@ -192,26 +182,25 @@ class RepoControllerTest {
                         jsonPath("$.stars").value(6767),
                         jsonPath("$.createdAt").value("2000-11-24T09:14:30Z")
                 );
-        verify(service).updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand);
+        verify(service).updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand());
     }
 
     @Test
     void updateRepository_RepositoryNotFound_Response404() throws Exception {
         // given
-        RepoUpdateCommand repoUpdateCommand = repoUpdateCommand();
-        when(service.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand))
+        when(service.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand()))
                 .thenThrow(new RepoNotFoundException("neqrofukk/medical-clinic"));
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.put("/local/repositories/neqrofukk/medical-clinic")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(repoUpdateCommand)))
+                        .content(objectMapper.writeValueAsString(repoUpdateCommand())))
                 .andExpectAll(
                         status().isNotFound(),
                         jsonPath("$.status").value(404),
                         jsonPath("$.detail").value("Repo neqrofukk/medical-clinic not found")
                 );
-        verify(service).updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand);
+        verify(service).updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand());
     }
 
     @Test

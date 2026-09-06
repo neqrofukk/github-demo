@@ -31,7 +31,7 @@ public class RepoController {
     @GetMapping("/github/repositories/{owner}/{repositoryName}")
     @ResponseStatus(HttpStatus.OK)
     public RepoDto getGitHubRepository(@PathVariable String owner, @PathVariable String repositoryName) {
-        log.info("GET /repositories/{}/{}", owner, repositoryName);
+        log.info("GET /github/repositories/{}/{}", owner, repositoryName);
         return service.getGitHubRepository(owner, repositoryName);
     }
 
@@ -56,7 +56,7 @@ public class RepoController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/local/repositories/{owner}/{repositoryName}")
     public RepoDto createRepository(@PathVariable String owner, @PathVariable String repositoryName, @Valid @RequestBody RepoCreateCommand body) {
-        log.info("POST /repositories/{}/{}", owner, repositoryName);
+        log.info("POST /local/repositories/{}/{}", owner, repositoryName);
         return service.createRepository(owner, repositoryName, body);
     }
 

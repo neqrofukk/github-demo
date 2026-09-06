@@ -2,7 +2,9 @@ package com.neqrofukk.githubrepo.service;
 
 import com.neqrofukk.githubrepo.client.github.GitHubRepositoryClient;
 import com.neqrofukk.githubrepo.client.github.GitHubRepositoryResponse;
-import com.neqrofukk.githubrepo.dto.*;
+import com.neqrofukk.githubrepo.dto.RepoCreateCommand;
+import com.neqrofukk.githubrepo.dto.RepoDto;
+import com.neqrofukk.githubrepo.dto.RepoUpdateCommand;
 import com.neqrofukk.githubrepo.entity.Repo;
 import com.neqrofukk.githubrepo.exception.RepoAlreadyExistsException;
 import com.neqrofukk.githubrepo.exception.RepoNotFoundException;
@@ -21,14 +23,14 @@ public class RepoService {
 
     public RepoDto getGitHubRepository(String owner, String repositoryName) {
         GitHubRepositoryResponse repo = gitHubClient.getRepository(owner, repositoryName);
-        return mapper.toRepoDto(repo);
+        return mapper.toDto(repo);
     }
 
     @Transactional(readOnly = true)
     public RepoDto getRepository(String owner, String repositoryName) {
         String fullName = Repo.buildFullName(owner, repositoryName);
         Repo repoEntity = repository.findByFullName(fullName).orElseThrow(() -> new RepoNotFoundException(fullName));
-        return mapper.toRepoDto(repoEntity);
+        return mapper.toDto(repoEntity);
     }
 
     @Transactional
@@ -37,17 +39,26 @@ public class RepoService {
         if (repository.existsByFullName(fullName)) {
             throw new RepoAlreadyExistsException(fullName);
         }
-        Repo repoEntity = mapper.toRepoEntity(owner, repositoryName, repo);
+        Repo repoEntity = mapper.toEntity(owner, repositoryName, repo);
         Repo savedRepo = repository.save(repoEntity);
-        return mapper.toRepoDto(savedRepo);
+        return mapper.toDto(savedRepo);
     }
 
     @Transactional
     public RepoDto updateRepository(String owner, String repositoryName, RepoUpdateCommand repo) {
         String fullName = Repo.buildFullName(owner, repositoryName);
         Repo repoEntity = repository.findByFullName(fullName).orElseThrow(() -> new RepoNotFoundException(fullName));
+
+        String newFullName = Repo.buildFullName(
+                repo.owner() != null ? repo.owner() : repoEntity.getOwner(),
+                repo.repositoryName() != null ? repo.repositoryName() : repoEntity.getRepositoryName());
+
+        if (!newFullName.equals(fullName) && repository.existsByFullName(newFullName)) {
+            throw new RepoAlreadyExistsException(newFullName);
+        }
+
         repoEntity.update(repo);
-        return mapper.toRepoDto(repoEntity);
+        return mapper.toDto(repoEntity);
     }
 
     @Transactional
@@ -56,7 +67,5 @@ public class RepoService {
         Repo repoEntity = repository.findByFullName(fullName).orElseThrow(() -> new RepoNotFoundException(fullName));
         repository.delete(repoEntity);
     }
-
-
 
 }

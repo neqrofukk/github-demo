@@ -3,6 +3,8 @@ package com.neqrofukk.githubrepo.client.github;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 
+import java.time.OffsetDateTime;
+
 @Builder
 public record GitHubRepositoryResponse(
         @JsonProperty("full_name")
@@ -13,5 +15,5 @@ public record GitHubRepositoryResponse(
         @JsonProperty("stargazers_count")
         Integer stars,
         @JsonProperty("created_at")
-        String createdAt
+        OffsetDateTime createdAt
 ) { }

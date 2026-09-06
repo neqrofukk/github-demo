@@ -6,10 +6,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @EnableFeignClients
 @SpringBootApplication
-public class GitHubRepo {
+public class GitHubRepoApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(GitHubRepo.class, args);
+        SpringApplication.run(GitHubRepoApplication.class, args);
     }
 
 }

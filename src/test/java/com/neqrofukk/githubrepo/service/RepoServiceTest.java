@@ -1,8 +1,7 @@
 package com.neqrofukk.githubrepo.service;
 
 import com.neqrofukk.githubrepo.client.github.GitHubRepositoryClient;
-import com.neqrofukk.githubrepo.client.github.GitHubRepositoryResponse;
-import com.neqrofukk.githubrepo.dto.*;
+import com.neqrofukk.githubrepo.dto.RepoDto;
 import com.neqrofukk.githubrepo.entity.Repo;
 import com.neqrofukk.githubrepo.exception.RepoAlreadyExistsException;
 import com.neqrofukk.githubrepo.exception.RepoNotFoundException;
@@ -18,8 +17,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static com.neqrofukk.githubrepo.util.RepoTestDataFactory.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class RepoServiceTest {
@@ -39,8 +37,7 @@ class RepoServiceTest {
     @Test
     void getGitHubRepository_RepositoryExists_RepositoryReturned() {
         // given
-        GitHubRepositoryResponse repo = gitHubRepositoryResponse();
-        when(gitHubRepositoryClient.getRepository("neqrofukk", "medical-clinic")).thenReturn(repo);
+        when(gitHubRepositoryClient.getRepository("neqrofukk", "medical-clinic")).thenReturn(gitHubRepositoryResponse());
 
         // when
         RepoDto result = repoService.getGitHubRepository("neqrofukk", "medical-clinic");
@@ -48,10 +45,10 @@ class RepoServiceTest {
         // then
         Assertions.assertAll(
                 () -> assertEquals("neqrofukk/medical-clinic", result.fullName()),
-                () -> assertEquals("Highly advanced future tech medical app", result.description()),
+                () -> assertNull(result.description()),
                 () -> assertEquals("https://github.com/neqrofukk/medical-clinic.git", result.cloneUrl()),
-                () -> assertEquals(2137, result.stars()),
-                () -> assertEquals(OffsetDateTime.parse("2000-11-23T08:12:30Z"), result.createdAt())
+                () -> assertEquals(0, result.stars()),
+                () -> assertEquals(OffsetDateTime.parse("2026-07-25T15:31:52Z"), result.createdAt())
         );
         verify(gitHubRepositoryClient).getRepository("neqrofukk", "medical-clinic");
     }
@@ -59,8 +56,7 @@ class RepoServiceTest {
     @Test
     void getRepository_RepositoryExists_RepositoryReturned() {
         // given
-        Repo repo = repoEntity();
-        when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.of(repo));
+        when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.of(repoEntity()));
 
         // when
         RepoDto result = repoService.getRepository("neqrofukk", "medical-clinic");
@@ -91,12 +87,11 @@ class RepoServiceTest {
     @Test
     void createRepository_ValidCreationData_RepositoryCreatedAndReturned() {
         // given
-        RepoCreateCommand repoCreateCommand = repoCreateCommand();
-        Repo repoEntity = repoMapper.toRepoEntity("neqrofukk", "medical-clinic", repoCreateCommand);
+        Repo repoEntity = repoMapper.toEntity("neqrofukk", "medical-clinic", repoCreateCommand());
         when(repoRepository.save(any(Repo.class))).thenReturn(repoEntity);
 
         // when
-        RepoDto result = repoService.createRepository("neqrofukk", "medical-clinic", repoCreateCommand);
+        RepoDto result = repoService.createRepository("neqrofukk", "medical-clinic", repoCreateCommand());
 
         // then
         Assertions.assertAll(
@@ -111,13 +106,12 @@ class RepoServiceTest {
     @Test
     void createRepository_RepositoryAlreadyExists_ThrowsException() {
         // given
-        RepoCreateCommand repoCreateCommand = repoCreateCommand();
         when(repoRepository.existsByFullName("neqrofukk/medical-clinic")).thenReturn(true);
 
         // when + then
         RepoAlreadyExistsException exception = assertThrows(
                 RepoAlreadyExistsException.class,
-                () -> repoService.createRepository("neqrofukk", "medical-clinic", repoCreateCommand));
+                () -> repoService.createRepository("neqrofukk", "medical-clinic", repoCreateCommand()));
         assertEquals("Repo neqrofukk/medical-clinic already exists", exception.getMessage());
         verify(repoRepository).existsByFullName("neqrofukk/medical-clinic");
     }
@@ -125,13 +119,10 @@ class RepoServiceTest {
     @Test
     void updateRepository_RepositoryExists_RepositoryUpdatedAndReturned() {
         // given
-        RepoUpdateCommand repoUpdateCommand = repoUpdateCommand();
-        Repo repo = repoEntity();
-
-        when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.of(repo));
+        when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.of(repoEntity()));
 
         // when
-        RepoDto result = repoService.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand);
+        RepoDto result = repoService.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand());
 
         // then
         Assertions.assertAll(
@@ -146,30 +137,41 @@ class RepoServiceTest {
     @Test
     void updateRepository_RepositoryNotFound_ThrowsException() {
         // given
-        RepoUpdateCommand repoUpdateCommand = repoUpdateCommand();
         when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.empty());
 
         // when + then
         RepoNotFoundException exception = assertThrows(
                 RepoNotFoundException.class,
-                () -> repoService.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand));
+                () -> repoService.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand()));
         assertEquals("Repo neqrofukk/medical-clinic not found", exception.getMessage());
         verify(repoRepository).findByFullName("neqrofukk/medical-clinic");
     }
 
     @Test
+    void updateRepository_NewFullNameAlreadyTaken_ThrowsException() {
+        // given
+        when(repoRepository.findByFullName("neqrofukk/medical-clinic")).thenReturn(Optional.of(repoEntity()));
+        when(repoRepository.existsByFullName("neqrofukk2/medical-clinic2")).thenReturn(true);
+
+        // when + then
+        RepoAlreadyExistsException exception = assertThrows(
+                RepoAlreadyExistsException.class,
+                () -> repoService.updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand()));
+        assertEquals("Repo neqrofukk2/medical-clinic2 already exists", exception.getMessage());
+    }
+
+    @Test
     void deleteRepository_RepositoryExists_RepositoryDeleted() {
-        // when
+        // given
         String fullName = "neqrofukk/medical-clinic";
-        Repo repo = repoEntity();
-        when(repoRepository.findByFullName(fullName)).thenReturn(Optional.of(repo));
+        when(repoRepository.findByFullName(fullName)).thenReturn(Optional.of(repoEntity()));
 
         // when
         repoService.deleteRepository("neqrofukk", "medical-clinic");
 
         // then
-        verify(repoRepository, times(1)).findByFullName(fullName);
-        verify(repoRepository, times(1)).delete(repo);
+        verify(repoRepository).findByFullName(fullName);
+        verify(repoRepository).delete(repoEntity());
     }
 
     @Test

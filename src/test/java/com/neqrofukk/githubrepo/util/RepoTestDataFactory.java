@@ -16,8 +16,7 @@ public final class RepoTestDataFactory {
     public static final String DESCRIPTION = "Highly advanced future tech medical app";
     public static final String CLONE_URL = "https://github.com/neqrofukk/medical-clinic.git";
     public static final int STARS = 2137;
-    public static final String CREATED_AT_RAW = "2000-11-23T08:12:30Z";
-    public static final OffsetDateTime CREATED_AT = OffsetDateTime.parse(CREATED_AT_RAW);
+    public static final OffsetDateTime CREATED_AT = OffsetDateTime.parse("2000-11-23T08:12:30Z");
 
     public static final String UPDATED_OWNER = "neqrofukk2";
     public static final String UPDATED_REPOSITORY_NAME = "medical-clinic2";
@@ -67,10 +66,20 @@ public final class RepoTestDataFactory {
     public static GitHubRepositoryResponse gitHubRepositoryResponse() {
         return GitHubRepositoryResponse.builder()
                 .fullName(FULL_NAME)
-                .description(DESCRIPTION)
+                .description(null)
                 .cloneUrl(CLONE_URL)
-                .stars(STARS)
-                .createdAt(CREATED_AT_RAW)
+                .stars(0)
+                .createdAt(OffsetDateTime.parse("2026-07-25T15:31:52Z"))
+                .build();
+    }
+
+    public static RepoDto gitHubRepositoryDto() {
+        return RepoDto.builder()
+                .fullName(FULL_NAME)
+                .description(null)
+                .cloneUrl(CLONE_URL)
+                .stars(0)
+                .createdAt(OffsetDateTime.parse("2026-07-25T15:31:52Z"))
                 .build();
     }
 

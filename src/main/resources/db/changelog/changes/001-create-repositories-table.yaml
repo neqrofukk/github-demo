@@ -43,7 +43,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: created_at
-                  type: TIMESTAMP WITH TIMEZONE
+                  type: DATETIME
                   constraints:
                     nullable: false
               - column:
