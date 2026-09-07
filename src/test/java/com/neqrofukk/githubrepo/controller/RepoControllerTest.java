@@ -15,8 +15,9 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import tools.jackson.databind.ObjectMapper;
 
 import static com.neqrofukk.githubrepo.util.RepoTestDataFactory.*;
+import static com.neqrofukk.githubrepo.util.RepoTestResultMatcher.expectExceptionStatus;
+import static com.neqrofukk.githubrepo.util.RepoTestResultMatcher.expectRepoDto;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RepoController.class)
@@ -36,14 +37,8 @@ class RepoControllerTest {
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.get("/github/repositories/neqrofukk/medical-clinic"))
-                .andExpectAll(
-                        status().isOk(),
-                        jsonPath("$.fullName").value("neqrofukk/medical-clinic"),
-                        jsonPath("$.description").isEmpty(),
-                        jsonPath("$.cloneUrl").value("https://github.com/neqrofukk/medical-clinic.git"),
-                        jsonPath("$.stars").value(0),
-                        jsonPath("$.createdAt").value("2026-07-25T15:31:52Z")
-                );
+                .andExpect(status().isOk())
+                .andExpectAll(expectRepoDto(gitHubRepositoryDto()));
         verify(service).getGitHubRepository("neqrofukk", "medical-clinic");
     }
 
@@ -55,11 +50,8 @@ class RepoControllerTest {
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.get("/github/repositories/neqrofukk/medical-clinic"))
-                .andExpectAll(
-                        status().isNotFound(),
-                        jsonPath("$.status").value(404),
-                        jsonPath("$.detail").value("GitHub API error: Not Found")
-                );
+                .andExpect(status().isNotFound())
+                .andExpectAll(expectExceptionStatus("GitHub API error: Not Found", 404));
         verify(service).getGitHubRepository("neqrofukk", "medical-clinic");
     }
 
@@ -71,11 +63,8 @@ class RepoControllerTest {
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.get("/github/repositories/neqrofukk/medical-clinic"))
-                .andExpectAll(
-                        status().isForbidden(),
-                        jsonPath("$.status").value(403),
-                        jsonPath("$.detail").value("GitHub API error: Forbidden")
-                );
+                .andExpect(status().isForbidden())
+                .andExpectAll(expectExceptionStatus("GitHub API error: Forbidden", 403));
         verify(service).getGitHubRepository("neqrofukk", "medical-clinic");
     }
 
@@ -87,11 +76,8 @@ class RepoControllerTest {
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.get("/github/repositories/neqrofukk/medical-clinic"))
-                .andExpectAll(
-                        status().isMovedPermanently(),
-                        jsonPath("$.status").value(301),
-                        jsonPath("$.detail").value("GitHub API error: Moved Permanently")
-                );
+                .andExpect(status().isMovedPermanently())
+                .andExpectAll(expectExceptionStatus("GitHub API error: Moved Permanently", 301));
         verify(service).getGitHubRepository("neqrofukk", "medical-clinic");
     }
 
@@ -102,14 +88,8 @@ class RepoControllerTest {
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.get("/local/repositories/neqrofukk/medical-clinic"))
-                .andExpectAll(
-                        status().isOk(),
-                        jsonPath("$.fullName").value("neqrofukk/medical-clinic"),
-                        jsonPath("$.description").value("Highly advanced future tech medical app"),
-                        jsonPath("$.cloneUrl").value("https://github.com/neqrofukk/medical-clinic.git"),
-                        jsonPath("$.stars").value(2137),
-                        jsonPath("$.createdAt").value("2000-11-23T08:12:30Z")
-                );
+                .andExpect(status().isOk())
+                .andExpectAll(expectRepoDto(repoDto()));
         verify(service).getRepository("neqrofukk", "medical-clinic");
     }
 
@@ -120,11 +100,8 @@ class RepoControllerTest {
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.get("/local/repositories/neqrofukk/medical-clinic"))
-                .andExpectAll(
-                        status().isNotFound(),
-                        jsonPath("$.status").value(404),
-                        jsonPath("$.detail").value("Repo neqrofukk/medical-clinic not found")
-                );
+                .andExpect(status().isNotFound())
+                .andExpectAll(expectExceptionStatus("Repo neqrofukk/medical-clinic not found", 404));
         verify(service).getRepository("neqrofukk", "medical-clinic");
     }
 
@@ -137,14 +114,8 @@ class RepoControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/local/repositories/neqrofukk/medical-clinic")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(repoCreateCommand())))
-                .andExpectAll(
-                        status().isCreated(),
-                        jsonPath("$.fullName").value("neqrofukk/medical-clinic"),
-                        jsonPath("$.description").value("Highly advanced future tech medical app"),
-                        jsonPath("$.cloneUrl").value("https://github.com/neqrofukk/medical-clinic.git"),
-                        jsonPath("$.stars").value(2137),
-                        jsonPath("$.createdAt").value("2000-11-23T08:12:30Z")
-                );
+                .andExpect(status().isCreated())
+                .andExpectAll(expectRepoDto(repoDto()));
         verify(service).createRepository("neqrofukk", "medical-clinic", repoCreateCommand());
     }
 
@@ -157,11 +128,8 @@ class RepoControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/local/repositories/neqrofukk/medical-clinic")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(repoCreateCommand())))
-                .andExpectAll(
-                        status().isConflict(),
-                        jsonPath("$.status").value(409),
-                        jsonPath("$.detail").value("Repo neqrofukk/medical-clinic already exists")
-                );
+                .andExpect(status().isConflict())
+                .andExpectAll(expectExceptionStatus("Repo neqrofukk/medical-clinic already exists", 409));
         verify(service).createRepository("neqrofukk", "medical-clinic", repoCreateCommand());
     }
 
@@ -174,14 +142,8 @@ class RepoControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.put("/local/repositories/neqrofukk/medical-clinic")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(repoUpdateCommand())))
-                .andExpectAll(
-                        status().isOk(),
-                        jsonPath("$.fullName").value("neqrofukk2/medical-clinic2"),
-                        jsonPath("$.description").value("Highly advanced future tech medical app updated"),
-                        jsonPath("$.cloneUrl").value("https://github.com/neqrofukk2/medical-clinic2.git"),
-                        jsonPath("$.stars").value(6767),
-                        jsonPath("$.createdAt").value("2000-11-24T09:14:30Z")
-                );
+                .andExpect(status().isOk())
+                .andExpectAll(expectRepoDto(updatedRepoDto()));
         verify(service).updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand());
     }
 
@@ -195,11 +157,8 @@ class RepoControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.put("/local/repositories/neqrofukk/medical-clinic")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(repoUpdateCommand())))
-                .andExpectAll(
-                        status().isNotFound(),
-                        jsonPath("$.status").value(404),
-                        jsonPath("$.detail").value("Repo neqrofukk/medical-clinic not found")
-                );
+                .andExpect(status().isNotFound())
+                .andExpectAll(expectExceptionStatus("Repo neqrofukk/medical-clinic not found", 404));
         verify(service).updateRepository("neqrofukk", "medical-clinic", repoUpdateCommand());
     }
 
@@ -220,11 +179,8 @@ class RepoControllerTest {
 
         // when + then
         mockMvc.perform(MockMvcRequestBuilders.delete("/local/repositories/neqrofukk/medical-clinic"))
-                .andExpectAll(
-                        status().isNotFound(),
-                        jsonPath("$.status").value(404),
-                        jsonPath("$.detail").value("Repo neqrofukk/medical-clinic not found")
-                );
+                .andExpect(status().isNotFound())
+                .andExpectAll(expectExceptionStatus("Repo neqrofukk/medical-clinic not found", 404));
         verify(service).deleteRepository("neqrofukk", "medical-clinic");
     }
 

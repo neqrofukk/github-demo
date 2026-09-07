@@ -26,6 +26,7 @@ public final class RepoTestDataFactory {
     public static final int UPDATED_STARS = 6767;
     public static final OffsetDateTime UPDATED_CREATED_AT = OffsetDateTime.parse("2000-11-24T09:14:30Z");
 
+    public static final OffsetDateTime GITHUB_CREATED_AT = OffsetDateTime.parse("2026-07-25T15:31:52Z");
 
     private RepoTestDataFactory() { }
 
@@ -69,7 +70,7 @@ public final class RepoTestDataFactory {
                 .description(null)
                 .cloneUrl(CLONE_URL)
                 .stars(0)
-                .createdAt(OffsetDateTime.parse("2026-07-25T15:31:52Z"))
+                .createdAt(GITHUB_CREATED_AT)
                 .build();
     }
 
@@ -79,7 +80,7 @@ public final class RepoTestDataFactory {
                 .description(null)
                 .cloneUrl(CLONE_URL)
                 .stars(0)
-                .createdAt(OffsetDateTime.parse("2026-07-25T15:31:52Z"))
+                .createdAt(GITHUB_CREATED_AT)
                 .build();
     }
 
