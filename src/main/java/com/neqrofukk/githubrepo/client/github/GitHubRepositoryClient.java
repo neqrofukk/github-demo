@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
-        value = "neqro-github-api",
+        value = "githubClient",
         url = "${github.api.url}",
         configuration = GitHubRepositoryClientConfig.class)
 public interface GitHubRepositoryClient {
