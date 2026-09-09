@@ -1,6 +1,7 @@
 package com.neqrofukk.githubrepo.exception.handler;
 
 import com.neqrofukk.githubrepo.exception.RepoException;
+import feign.RetryableException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
@@ -42,10 +43,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(OptimisticLockingFailureException.class)
-    ProblemDetail handleOptimisticLock(OptimisticLockingFailureException ex) {
+    public ProblemDetail handleOptimisticLock(OptimisticLockingFailureException ex) {
         log.warn("Concurrent modification: {}", ex.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
                 "Repository was modified by another request, retry");
+    }
+
+    @ExceptionHandler(RetryableException.class)
+    public ProblemDetail handleRetryUnavailable(RetryableException ex) {
+        log.error("GitHub API still unavailable after 3 retries, status = {}", ex.getMessage());
+        return ProblemDetail.forStatusAndDetail(
+                HttpStatus.SERVICE_UNAVAILABLE,
+                "GitHub API is currently unavailable"
+        );
     }
 
 }
