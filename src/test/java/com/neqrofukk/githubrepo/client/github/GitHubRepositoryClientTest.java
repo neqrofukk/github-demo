@@ -62,11 +62,11 @@ class GitHubRepositoryClientTest {
         stubFor(get("/neqrofukk/medical-clinic").inScenario("Retry")
                 .whenScenarioStateIs("Second retry")
                 .willReturn(okJson("""
-                                {"full_name": "neqrofukk/medical-clinic",
-                                "description": null,
-                                "clone_url": "https://github.com/neqrofukk/medical-clinic.git",
-                                "stargazers_count": 0,
-                                "created_at": "2026-07-25T15:31:52Z"}
+                                { "full_name": "neqrofukk/medical-clinic",
+                                  "description": null,
+                                  "clone_url": "https://github.com/neqrofukk/medical-clinic.git",
+                                  "stargazers_count": 0,
+                                  "created_at": "2026-07-25T15:31:52Z" }
                         """)));
 
         RepoDto result = repoService.getGitHubRepository("neqrofukk", "medical-clinic");
