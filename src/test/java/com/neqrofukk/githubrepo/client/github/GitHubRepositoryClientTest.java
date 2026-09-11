@@ -2,7 +2,6 @@ package com.neqrofukk.githubrepo.client.github;
 
 import com.neqrofukk.githubrepo.dto.RepoDto;
 import com.neqrofukk.githubrepo.service.RepoService;
-import feign.RetryableException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +25,9 @@ class GitHubRepositoryClientTest {
 
     @Test
     void getRepository_RepositoryExists_RepositoryReturned() {
-        stubFor(get("/neqrofukk/medical-clinic").willReturn(okJson("""
-                        { "full_name": "neqrofukk/medical-clinic",
-                          "description": null,
-                          "clone_url": "https://github.com/neqrofukk/medical-clinic.git",
-                          "stargazers_count": 0,
-                          "created_at": "2026-07-25T15:31:52Z" }
-                """)));
+        stubFor(get("/neqrofukk/medical-clinic").willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBodyFile("client/github/repository.json")));
 
         RepoDto result = repoService.getGitHubRepository("neqrofukk", "medical-clinic");
 
@@ -61,13 +56,9 @@ class GitHubRepositoryClientTest {
 
         stubFor(get("/neqrofukk/medical-clinic").inScenario("Retry")
                 .whenScenarioStateIs("Second retry")
-                .willReturn(okJson("""
-                                { "full_name": "neqrofukk/medical-clinic",
-                                  "description": null,
-                                  "clone_url": "https://github.com/neqrofukk/medical-clinic.git",
-                                  "stargazers_count": 0,
-                                  "created_at": "2026-07-25T15:31:52Z" }
-                        """)));
+                .willReturn(aResponse()
+                        .withHeader("Content-Type", "application/json")
+                        .withBodyFile("client/github/repository.json")));
 
         RepoDto result = repoService.getGitHubRepository("neqrofukk", "medical-clinic");
 
@@ -81,13 +72,31 @@ class GitHubRepositoryClientTest {
         verify(3, getRequestedFor(urlEqualTo("/neqrofukk/medical-clinic")));
     }
 
+    // Old test without fallback
+//    @Test
+//    void getRepository_RepositoryUnavailable_ThrowsExceptionAfterRetries() {
+//        stubFor(get("/neqrofukk/medical-clinic")
+//                .willReturn(serverError().withStatus(503)));
+//
+//        Assertions.assertThrows(RetryableException.class,
+//                () -> repoService.getGitHubRepository("neqrofukk", "medical-clinic"));
+//        verify(3, getRequestedFor(urlEqualTo("/neqrofukk/medical-clinic")));
+//    }
+
+    // Updated test above, this time with fallback
     @Test
-    void getRepository_RepositoryUnavailable_ThrowsExceptionAfterRetries() {
+    void getRepository_RepositoryUnavailable_EmptyRepositoryReturnedAsFallback() {
         stubFor(get("/neqrofukk/medical-clinic")
                 .willReturn(serverError().withStatus(503)));
 
-        Assertions.assertThrows(RetryableException.class,
-                () -> repoService.getGitHubRepository("neqrofukk", "medical-clinic"));
-        verify(3, getRequestedFor(urlEqualTo("/neqrofukk/medical-clinic")));
+        RepoDto result = repoService.getGitHubRepository("neqrofukk", "medical-clinic");
+
+        Assertions.assertAll(
+                () -> assertThat(result.fullName()).isEqualTo("neqrofukk/medical-clinic"),
+                () -> assertThat(result.description()).isNull(),
+                () -> assertThat(result.cloneUrl()).isNull(),
+                () -> assertThat(result.stars()).isNull(),
+                () -> assertThat(result.createdAt()).isNull()
+        );
     }
 }
