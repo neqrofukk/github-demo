@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  app:
+    image: 'ghapp:latest'
+    container_name: ghapp
+    depends_on:
+      - db
+    environment:
+      - POSTGRES_USER=neqrofukk
+      - POSTGRES_PASSWORD=123456
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/ghappdb
+      - SPRING_DATASOURCE_USERNAME=neqrofukk
+      - SPRING_DATASOURCE_PASSWORD=123456
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+    ports:
+      - "8080:8080"
+    networks:
+      ghapp-network:
+
+  db:
+    image: postgres
+    container_name: db
+    environment:
+      - POSTGRES_USER=neqrofukk
+      - POSTGRES_PASSWORD=123456
+      - POSTGRES_DB=ghappdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      ghapp-network:
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "8888:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
+      PGADMIN_DEFAULT_PASSWORD: strong-password
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      ghapp-network:
+
+volumes:
+  pgdata:
+  pgadmin-data:
+
+networks:
+  ghapp-network:
